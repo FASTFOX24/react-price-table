@@ -1,70 +1,79 @@
-# Getting Started with Create React App
+# 리액트 정리 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 1. `display : flex` 속성의 오해
+이전에 `display : flex` 속성은 block 태그인 자식을 inline 태그로 바꿔준다고 했는데 이건 잘못된 말이었다. 
+정확한 말은 `부모 요소를 flex 컨테이너로 만들고 자식 요소들을 flex item으로 만든다`는 것이다. 
+이게 무슨 뜻이냐. 
+```
+inline -> 텍스트 흐름
+block -> 블록 흐름
+flex item -> flex 레이아웃 규칙
+```
+위와 같이 display : flex가 적용된 요소는 block이나 inline 그 무엇도 아닌 `flex item`이라는 속성으로 새롭게 정의된다고 생각하면 된다. 
+즉, 아래와 같이 inline 요소인 input과 label로 이루어진 구조가 있고 이걸 세로 정렬을 하고 싶다면 단순히 `flex-direction : column`만 적는다고 정렬이 되는게 아니라 `display : flex` 속성을 적용 후 `flex-direction` 속성이 적용 가능한 것이다. 
 
-## Available Scripts
+### 1-1. `display : flex`가 언제 사용되는가
+사실 CSS를 건드리면 대부분 우리가 자주 사용하는 스타일 코드들은 대부분 `display : flex` 속성을 필요로 한다.
+그렇다면 글로벌 CSS로 모든 요소에 적용시켜버리면 안될까? 라는 생각을 했다.
+결론은 안된다는 것이다. 
 
-In the project directory, you can run:
+우선 `display : flex`가 언제 필요한지 정의해 보자면 `레이아웃이 필요할 때만 flex를 사용한다`이다.
+요소 배치/정렬, 가로/세로 정렬을 명확히 제어할 때, 아이템 간 관계(간격,정렬)이 중요할 때 사용하는 것이다. 
 
-### `npm start`
+이렇게 정리하면 사실 CSS 구조에서 많은 부분에서 flex가 들어가는게 맞긴하지만 사용되지 않는 부분도 있다.
+예를 들어
+```html
+<p>문단</p>
+<p>문단</p>
+```
+위와 같이 단순 문서 흐름, 위에서 아래로 쌓이는 구조, 의미 구조가 더 중요한 경우라면 flex를 사용하지 않는게 더 바람직 하기 때문에 글로벌 CSS로 flex를 정의하지는 않는 것이다. 
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 1-2. 추가적인 예시_1
+```jsx
+<div className="products_table_container">
+    <SearchBar />
+    <ProductTable products={products} />
+</div>
+```
+이번 프로젝트의 App.jsx 파일에 있는 코드로 예시를 들어보자.
+위의 코드 중 SearchBar와 ProductTable의 간격을 벌리려고 한다. 
+이떄 부모 요소인 div에 `flex`와 `gap`을 주는게 맞을까? 아니면 ProductTable이나 SearchBar에 `margin`을 주는게 맞을까? 
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+정답은 flex와 gap이다.
+비록 코드의 수는 margin을 사용하는게 더 적을지 몰라도 이 경우에는 부모가 레이아웃을 책임지는게 좋다. 
+SearchBar와 ProductTable은 순수 컴포넌트이기 때문에 주변 요소를 몰라도 되는데 margin을 사용해서 레이아웃을 조정하면 구조 변경에 취약해지게 된다.
 
-### `npm test`
+반대로 컴포넌트 내부 요소라면?
+```jsx
+<ProductTable>
+  <h2>상품 목록</h2>
+  <table />
+</ProductTable>
+```
+위의 경우에서 h2와 table의 간격을 벌리고 싶다면 컴포넌트 내부 요소간의 레이아웃 정렬이기 때문에 margin을 사용해도 문제없다. 
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1-2추가적인 예시_2
+알아보다 보니 추가적으로 궁금한게 생겼다.
+```
+1. 컴포넌트 내부 요소에서 flex를 사용하는건 안좋은 것인가?
+2. 컴포넌트 형제 요소끼리 간격이 다를 경우는?
+```
+우선 1번 질문에 대한 답을 정리하자면 안되는건 아니다. 
+하지만 의미 구조를 유지하고 불필요한 레이아웃 컨테이너를 줄이기 위해서 지양하는 방법이지만 이미 구조가 복잡하거나 확장 가능성이 있거나 혹은 내부도 하나의 레이아웃인 경우라면 내부 요소에서도 flex 사용이 가능하다
+👉 내부가 단순하면 margin, 복잡하면 flex
 
-### `npm run build`
+다음은 2번이다.
+이런 경우에 가장 좋은 방법은 `같은 것끼리 묶는 것`이다.
+이렇게 하면 의미 구조에도 맞으며 레이아웃의 책임이 명확해지므로 유지 보수와 확장에도 용이하다.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 2. 리액트 state 주의 사항
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 2-1. state는 변하는 데이터에 사용할 것
+state 개념이 익숙하더라도 정적인 구조를 만드는데 사용하지는 말것. 
+state는 오직 상호작용을 위해, 즉 `시간이 지남에 따라 데이터가 바뀌는 것`에 사용해야 한다. 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 2-2. 무분별한 state 사용 금지
+State를 구조화하는 데 가장 중요한 원칙은 중복 배제 원칙, 즉 최소한의 State를 파악하고 나머지 모든 것들은 필요에 따라 실시간으로 계산을 하는 것이다.
+예를들어 쇼핑 리스트를 만든다고 하면 배열에 상품 아이템들이 들어갈텐데 이떄 UI에 상품 아이템의 개수를 노출하고 싶다고 하면 상품 아이템 개수를 따로 State 값으로 가지는 게 아니라 단순하게 배열의 길이만 쓰는 방식을 말한다.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+📌 <span style={{color:gray}}>리액트에서 props는 함수를 통해 전달되는 인자 같은 성격, state는 컴포넌트의 메모리 같은 성격을 가진다.</span>
