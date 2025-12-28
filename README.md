@@ -11,6 +11,16 @@ flex item -> flex 레이아웃 규칙
 ```
 위와 같이 display : flex가 적용된 요소는 block이나 inline 그 무엇도 아닌 `flex item`이라는 속성으로 새롭게 정의된다고 생각하면 된다. 
 즉, 아래와 같이 inline 요소인 input과 label로 이루어진 구조가 있고 이걸 세로 정렬을 하고 싶다면 단순히 `flex-direction : column`만 적는다고 정렬이 되는게 아니라 `display : flex` 속성을 적용 후 `flex-direction` 속성이 적용 가능한 것이다. 
+```
+<form>
+    <input type="text"/> // input은 inline 요소
+    <label> // label도 inline 요소
+        <input type="checkbox"/>
+        {""}
+        Only show products in stock
+    </label>
+</form>
+```
 
 ### 1-1. `display : flex`가 언제 사용되는가
 사실 CSS를 건드리면 대부분 우리가 자주 사용하는 스타일 코드들은 대부분 `display : flex` 속성을 필요로 한다.
